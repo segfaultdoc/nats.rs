@@ -680,8 +680,18 @@ impl ConnectionHandler {
             }
             Command::GetDroppedMessages { response, sid } => {
                 response
-                    .send(self.subscriptions.get(&sid).unwrap().dropped)
-                    .unwrap();
+                    .send(
+                        self.subscriptions
+                            .get(&sid)
+                            .ok_or_else(|| {
+                                std::io::Error::new(
+                                    ErrorKind::NotFound,
+                                    format!("could not find subscription {}", sid),
+                                )
+                            })?
+                            .dropped,
+                    )
+                    .ok();
             }
         }
 
