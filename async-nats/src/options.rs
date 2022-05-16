@@ -46,6 +46,7 @@ pub struct ConnectOptions {
     pub(crate) tls_client_config: Option<rustls::ClientConfig>,
     pub(crate) flush_interval: Duration,
     pub(crate) ping_interval: Duration,
+    pub(crate) subscription_capacity: usize,
     pub(crate) reconnect_callback: CallbackArg0<()>,
     pub(crate) disconnect_callback: CallbackArg0<()>,
     pub(crate) lame_duck_callback: CallbackArg0<()>,
@@ -87,6 +88,7 @@ impl Default for ConnectOptions {
             tls_client_config: None,
             flush_interval: Duration::from_millis(100),
             ping_interval: Duration::from_secs(60),
+            subscription_capacity: 1024,
             reconnect_callback: CallbackArg0::<()>(Box::new(|| Box::pin(async {}))),
             disconnect_callback: CallbackArg0::<()>(Box::new(|| Box::pin(async {}))),
             lame_duck_callback: CallbackArg0::<()>(Box::new(|| Box::pin(async {}))),
@@ -344,6 +346,23 @@ impl ConnectOptions {
     /// ```
     pub fn ping_interval(mut self, ping_interval: Duration) -> ConnectOptions {
         self.ping_interval = ping_interval;
+        self
+    }
+
+    /// Sets the capacity for `Subscriptions`. Exceeding it will trigger `slow consumer` error
+    /// callback and drop messages.
+    /// Defualt is set to 1024 messages buffer.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// # #[tokio::main]
+    /// # async fn main() -> std::io::Result<()> {
+    /// async_nats::ConnectOptions::new().subscription_capacity(1024).connect("demo.nats.io").await?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn subscription_capacity(mut self, capacity: usize) -> ConnectOptions {
+        self.subscription_capacity = capacity;
         self
     }
 
