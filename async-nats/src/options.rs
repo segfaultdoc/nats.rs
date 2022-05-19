@@ -349,7 +349,7 @@ impl ConnectOptions {
         self
     }
 
-    /// Sets the capacity for `Subscriptions`. Exceeding it will trigger `slow consumer` error
+    /// Sets the capacity for `Subscribers`. Exceeding it will trigger `slow consumer` error
     /// callback and drop messages.
     /// Defualt is set to 1024 messages buffer.
     ///
