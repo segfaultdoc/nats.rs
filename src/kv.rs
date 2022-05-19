@@ -782,7 +782,7 @@ impl Iterator for Keys {
                         .map(|s| s.to_string())
                 }
                 None => None,
-            }
+            };
         }
     }
 }
