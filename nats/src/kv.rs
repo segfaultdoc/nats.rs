@@ -787,8 +787,8 @@ impl Iterator for Keys {
             if self.done {
                 return None;
             }
-            return match self.subscription.next() {
-                Some(message) => {
+            return match self.subscription.next_timeout(Duration::from_millis(3000)) {
+                Ok(message) => {
                     // If there are no more pending messages we'll stop after delivering the key
                     // derived from this message.
                     if let Some(info) = message.jetstream_message_info() {
@@ -809,7 +809,7 @@ impl Iterator for Keys {
                         .strip_prefix(&self.prefix)
                         .map(|s| s.to_string())
                 }
-                None => None,
+                Err(_) => None,
             };
         }
     }
