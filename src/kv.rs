@@ -759,7 +759,7 @@ impl Iterator for Keys {
             return None;
         }
 
-        match self.subscription.next() {
+        match self.subscription.try_next() {
             Some(message) => {
                 // If there are no more pending messages we'll stop after delivering the key
                 // derived from this message.
