@@ -27,7 +27,7 @@ use lazy_static::lazy_static;
 use regex::Regex;
 
 /// Configuration values for key value stores.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Config {
     /// Name of the bucket
     pub bucket: String,
