@@ -24,6 +24,7 @@ use crate::jetstream::{
 };
 use crate::message::Message;
 use lazy_static::lazy_static;
+use log::info;
 use regex::Regex;
 
 /// Configuration values for key value stores.
@@ -781,6 +782,7 @@ impl Iterator for Keys {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
+            info!("kv next 1");
             if self.subscription.0.num_pending == 0 {
                 return None;
             }
@@ -789,27 +791,36 @@ impl Iterator for Keys {
             }
             return match self.subscription.next_timeout(Duration::from_millis(3000)) {
                 Ok(message) => {
+                    info!("kv next 2");
                     // If there are no more pending messages we'll stop after delivering the key
                     // derived from this message.
                     if let Some(info) = message.jetstream_message_info() {
+                        info!("kv next 3");
                         if info.pending == 0 {
+                            info!("kv next 4");
                             self.done = true;
                         }
                     }
 
                     // We are only interested in unique current keys from subjects so we skip delete
                     // and purge markers.
+                    info!("kv next 5");
                     let operation = kv_operation_from_maybe_headers(message.headers.as_ref());
                     if operation != Operation::Put {
+                        info!("kv next 6");
                         continue;
                     }
+                    info!("kv next 7");
 
                     message
                         .subject
                         .strip_prefix(&self.prefix)
                         .map(|s| s.to_string())
                 }
-                Err(_) => None,
+                Err(_) => {
+                    info!("kv next 8");
+                    None
+                },
             };
         }
     }
