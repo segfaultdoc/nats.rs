@@ -115,7 +115,7 @@ use std::slice;
 use std::str::{self, FromStr};
 use std::task::{Context, Poll};
 use tokio::io::ErrorKind;
-use tokio::time::{interval, Duration, Interval};
+use tokio::time::{interval, Duration, Interval, interval_at, Instant};
 use url::{Host, Url};
 
 use bytes::Bytes;
@@ -472,7 +472,7 @@ impl ConnectionHandler {
 
     async fn handle_flush(&mut self) -> Result<(), io::Error> {
         self.connection.flush().await?;
-        self.flush_interval.reset();
+        self.flush_interval = interval_at(Instant::now(), self.flush_interval.period());
 
         Ok(())
     }
