@@ -196,25 +196,36 @@ impl PushSubscription {
     /// # }
     /// ```
     pub fn next_timeout(&self, mut timeout: Duration) -> io::Result<Message> {
+        use log::*;
         loop {
+            info!("next_timeout 1");
             let start = Instant::now();
             return match self.0.messages.recv_timeout(timeout) {
                 Ok(message) => {
+                    info!("next_timeout 2");
                     if self.preprocess(&message) {
+                        info!("next_timeout 3");
                         timeout = timeout.saturating_sub(start.elapsed());
                         continue;
                     }
 
+                    info!("next_timeout 4");
                     Ok(message)
                 }
-                Err(channel::RecvTimeoutError::Timeout) => Err(io::Error::new(
-                    io::ErrorKind::TimedOut,
-                    "next_timeout: timed out",
-                )),
-                Err(channel::RecvTimeoutError::Disconnected) => Err(io::Error::new(
-                    io::ErrorKind::Other,
-                    "next_timeout: unsubscribed",
-                )),
+                Err(channel::RecvTimeoutError::Timeout) => {
+                    info!("next_timeout 5");
+                    Err(io::Error::new(
+                        io::ErrorKind::TimedOut,
+                        "next_timeout: timed out",
+                    ))
+                },
+                Err(channel::RecvTimeoutError::Disconnected) => {
+                    info!("next_timeout 6");
+                    Err(io::Error::new(
+                        io::ErrorKind::Other,
+                        "next_timeout: unsubscribed",
+                    ))
+                },
             };
         }
     }
